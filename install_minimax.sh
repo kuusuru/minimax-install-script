@@ -1,4 +1,15 @@
 #!/bin/bash
+#
+# MiniMax Claude Code Installer (Coding Plan Edition)
+# Adapted from:
+#   - https://platform.minimax.io/docs/guides/text-ai-coding-tools
+#   - https://cdn.bigmodel.cn/install/claude_code_zai_env.sh
+#
+# Prerequisites:
+#   - Linux or macOS
+#   - Node.js 18+ (will be installed if missing)
+#   - MiniMax Coding Plan API Key
+#
 
 set -euo pipefail
 
@@ -148,7 +159,7 @@ select_key_type() {
 }
 
 configure_claude() {
-    log_info "Configuring Claude Code for MiniMax..."
+    log_info "Configuring Claude Code for MiniMax (Coding Plan Edition)..."
     echo ""
 
     select_key_type
