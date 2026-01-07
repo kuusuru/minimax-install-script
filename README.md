@@ -48,10 +48,25 @@ When prompted, select your billing type and get your API key from:
 
 ### 3. Start using Claude Code
 
-After installation, run:
-```bash
-claude
-```
+After installation:
+
+1. **Switch to your project folder** before running claude:
+   ```bash
+   cd /path/to/your/project
+   ```
+
+2. **Enable claude in current terminal:**
+   ```bash
+   source ~/.bashrc
+   ```
+   Or simply open a new terminal window.
+
+3. **Run claude:**
+   ```bash
+   claude
+   ```
+
+> **Note:** NVM is automatically added to `~/.bashrc` during installation. If claude doesn't work after switching terminals, run `source ~/.bashrc`.
 
 ## Uninstallation
 
@@ -89,6 +104,14 @@ Removes only MiniMax settings:
 Keeps Claude Code installed. Use this to just reconfigure MiniMax.
 
 Note: Node.js and NVM are never removed by this script.
+
+### After Uninstallation
+
+If you get "command not found" for claude, run:
+```bash
+hash -r
+```
+Or simply open a new terminal window.
 
 ## Adapting Existing Installation
 
