@@ -35,6 +35,19 @@ This installer is specifically adapted for users with a **MiniMax Coding Plan**.
 
 Run `claude` in your terminal to start using Claude Code with MiniMax-M2.1.
 
+## Uninstallation
+
+```bash
+chmod +x uninstall_minimax.sh
+./uninstall_minimax.sh
+```
+
+This will:
+1. Uninstall Claude Code via npm
+2. Remove MiniMax configuration files
+
+Note: Node.js and NVM are not removed.
+
 ## Troubleshooting
 
 If you encounter issues, ensure you've cleared any existing Anthropic environment variables:
