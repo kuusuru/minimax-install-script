@@ -114,11 +114,24 @@ check_nodejs() {
 #      Claude Code Installation
 # ========================
 
+check_claude_code() {
+    # Load nvm if available
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+    if command -v claude &>/dev/null; then
+        log_success "Claude Code is already installed."
+        return 0
+    fi
+    return 1
+}
+
 install_claude_code() {
     # Fix the "No such file or directory" bash cache error
-    hash -r 
-    
-    log_info "Installing/Updating Claude Code..."
+    hash -r
+
+    log_info "Installing Claude Code..."
     npm install -g "$CLAUDE_PACKAGE" || {
         log_error "NPM installation failed."
         exit 1
@@ -211,7 +224,11 @@ configure_claude() {
 
 main() {
     check_nodejs
-    install_claude_code
+
+    if ! check_claude_code; then
+        install_claude_code
+    fi
+
     configure_claude_json
     configure_claude
 
