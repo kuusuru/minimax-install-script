@@ -303,7 +303,15 @@ main() {
 
     echo ""
     log_success "MiniMax is ready!"
-    echo " Simply type 'claude' to start."
+    echo ""
+    echo "IMPORTANT: NVM was added to ~/.bashrc"
+    echo ""
+    echo "To use claude immediately, run:"
+    echo "  source ~/.bashrc"
+    echo ""
+    echo "Or simply open a new terminal window."
+    echo ""
+    echo "Then run: claude"
 }
 
 main "$@"
