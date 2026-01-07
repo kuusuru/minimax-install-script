@@ -223,9 +223,43 @@ configure_claude() {
 # ========================
 
 main() {
+    echo ""
+    echo "=============================================="
+    echo "   MiniMax Claude Code Installer"
+    echo "   (Coding Plan Edition)"
+    echo "=============================================="
+    echo ""
+
+    # Check if Claude Code is already installed
+    if check_claude_code; then
+        echo ""
+        log_info "Claude Code is already installed on this system."
+        echo ""
+        echo "To reinstall or update, you have two options:"
+        echo ""
+        echo "  1) Run uninstall_minimax.sh and select FULL UNINSTALL"
+        echo "     (Complete removal, then reinstall fresh)"
+        echo ""
+        echo "  2) Run uninstall_minimax.sh and select 'MiniMax Config Only'"
+        echo "     (Keep Claude Code, just reconfigure MiniMax)"
+        echo ""
+        echo "To proceed with a fresh install, exit and run:"
+        echo "  ./uninstall_minimax.sh"
+        echo ""
+        read -p "Continue anyway and just update configuration? (y/N): " confirm
+        echo ""
+
+        if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
+            log_info "Exiting. Run ./uninstall_minimax.sh first."
+            exit 0
+        fi
+
+        log_info "Proceeding to update MiniMax configuration only..."
+    fi
+
     check_nodejs
 
-    if ! check_claude_code; then
+    if ! command -v claude &>/dev/null; then
         install_claude_code
     fi
 

@@ -42,11 +42,40 @@ chmod +x uninstall_minimax.sh
 ./uninstall_minimax.sh
 ```
 
-This will:
-1. Uninstall Claude Code via npm
-2. Remove MiniMax configuration files
+The uninstaller offers two options:
 
-Note: Node.js and NVM are not removed.
+### 1) Full Uninstall
+Removes EVERYTHING:
+- Claude Code application
+- All configuration files (`.claude/`, `.mcp.json`, etc.)
+
+Use this to completely remove Claude Code from your system.
+
+### 2) MiniMax Config Only (Safer)
+Removes only MiniMax settings:
+- `~/.claude/settings.json`
+- `~/.claude.json`
+- Project-specific `.claude/` and `.mcp.json`
+
+Keeps Claude Code installed. Use this to just reconfigure MiniMax.
+
+Note: Node.js and NVM are never removed by this script.
+
+## Reinstalling
+
+If Claude Code is already installed, the installer will detect it and prompt you to use the uninstall script first. To reinstall:
+
+```bash
+# Option 1: Complete fresh install
+./uninstall_minimax.sh
+# Select "1) FULL UNINSTALL"
+./install_minimax.sh
+
+# Option 2: Just reconfigure MiniMax (keep Claude Code)
+./uninstall_minimax.sh
+# Select "2) MiniMax Config Only"
+./install_minimax.sh
+```
 
 ## Troubleshooting
 
