@@ -75,6 +75,7 @@ install_nodejs() {
             # Load nvm into current session
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
             # Install and use Node
             nvm install "$NODE_INSTALL_VERSION"
@@ -91,6 +92,11 @@ install_nodejs() {
 }
 
 check_nodejs() {
+    # Load nvm if available
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
     if command -v node &>/dev/null; then
         current_version=$(node -v | sed 's/v//')
         major_version=$(echo "$current_version" | cut -d. -f1)
