@@ -155,6 +155,9 @@ full_uninstall() {
     echo ""
     log_success "FULL UNINSTALL COMPLETE!"
     echo ""
+    echo "IMPORTANT: If you get 'command not found' for claude,"
+    echo "run 'hash -r' to clear bash cache, or open a new terminal."
+    echo ""
     echo "To reinstall, run: ./install_minimax.sh"
 }
 
@@ -216,6 +219,8 @@ config_only_uninstall() {
     log_success "MINIMAX CONFIGURATION REMOVED!"
     echo ""
     echo "Claude Code is still installed."
+    echo "IMPORTANT: If claude doesn't work, run 'hash -r' or open a new terminal."
+    echo ""
     echo "To reconfigure MiniMax, run: ./install_minimax.sh"
 }
 
