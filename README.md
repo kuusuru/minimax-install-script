@@ -6,7 +6,7 @@ Automated installer for using MiniMax-M2.1 with Claude Code, adapted for the Min
 
 This installer is adapted from:
 - [MiniMax AI Coding Tools Documentation](https://platform.minimax.io/docs/guides/text-ai-coding-tools)
-- [Original Claude Code install script](https://cdn.bigmodel.cn/install/claude_code_zai_env.sh)
+- Original script from Z.ai
 
 ## Prerequisites
 

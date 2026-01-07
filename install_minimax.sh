@@ -3,7 +3,7 @@
 # MiniMax Claude Code Installer (Coding Plan Edition)
 # Adapted from:
 #   - https://platform.minimax.io/docs/guides/text-ai-coding-tools
-#   - https://cdn.bigmodel.cn/install/claude_code_zai_env.sh
+#   - Original script from Z.ai
 #
 # Prerequisites:
 #   - Linux or macOS
