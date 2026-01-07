@@ -12,33 +12,62 @@ This installer is adapted from:
 
 - **Operating System:** Linux or macOS
 - **Node.js:** Version 18 or higher (will be installed automatically if missing)
-- **MiniMax API Key:** Get your Coding Plan API key at https://platform.minimax.io/user-center/payment/coding-plan
+- **MiniMax API Key:** Get from https://platform.minimax.io/user-center/payment/coding-plan
 
-## Usage
+> **Note:** This installer is specifically adapted for the MiniMax Coding Plan. If you have a Pay-As-You-Go platform key, you can still use it - just select option 2 when prompted for your billing type.
+
+## Installation
+
+### 1. Clone and run the installer
 
 ```bash
+# Clone the repository
+git clone https://github.com/kuusuru/minimax-install-script.git
+
+# Navigate to the directory
+cd minimax-install-script
+
+# Make the installer executable
 chmod +x install_minimax.sh
+
+# Run the installer
 ./install_minimax.sh
 ```
 
-The script will:
-1. Check/install Node.js via NVM
-2. Install/upgrade Claude Code
+The installer will:
+1. Check/install Node.js via NVM (if not present)
+2. Install Claude Code (if not already installed)
 3. Configure Claude Code with your MiniMax credentials
 4. Set all model variants to use MiniMax-M2.1
 
-## About Coding Plan
+### 2. Get your MiniMax API Key
 
-This installer is specifically adapted for users with a **MiniMax Coding Plan**. If you have a Pay-As-You-Go platform key, this script will still work - just select option 2 when prompted for your billing type.
+When prompted, select your billing type and get your API key from:
+- **Coding Plan**: https://platform.minimax.io/user-center/payment/coding-plan
+- **Pay-As-You-Go**: https://platform.minimax.io/user-center/basic-information/interface-key
 
-## After Installation
+### 3. Start using Claude Code
 
-Run `claude` in your terminal to start using Claude Code with MiniMax-M2.1.
+After installation, run:
+```bash
+claude
+```
 
 ## Uninstallation
 
+### 1. Clone and run the uninstaller (if not already cloned)
+
 ```bash
+# Clone the repository (if not already cloned)
+git clone https://github.com/kuusuru/minimax-install-script.git
+
+# Navigate to the directory
+cd minimax-install-script
+
+# Make the uninstaller executable
 chmod +x uninstall_minimax.sh
+
+# Run the uninstaller
 ./uninstall_minimax.sh
 ```
 
