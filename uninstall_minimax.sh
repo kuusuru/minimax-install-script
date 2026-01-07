@@ -36,15 +36,15 @@ set -euo pipefail
 CONFIG_DIR="$HOME/.claude"
 
 log_info() {
-    echo "🔹 $*"
+    echo "  * $*"
 }
 
 log_success() {
-    echo "✅ $*"
+    echo "  [OK] $*"
 }
 
 log_error() {
-    echo "❌ $*" >&2
+    echo "  [ERROR] $*" >&2
 }
 
 # ========================
@@ -72,16 +72,6 @@ check_claude_location() {
         log_info "Claude Code not found in PATH"
     fi
 
-    # Check common locations
-    if [ -f "/usr/bin/claude" ]; then
-        log_info "Claude Code found at: /usr/bin/claude"
-        claude_path="/usr/bin/claude"
-    fi
-
-    if [ -f "$NVM_DIR/versions/node/"*/lib/node_modules/@anthropic-ai/claude-code/dist/cli.js" ]; then
-        log_info "Claude Code found in NVM: $NVM_DIR/versions/node/"
-    fi
-
     echo "$claude_path"
 }
 
@@ -94,11 +84,11 @@ full_uninstall() {
     log_info "Starting FULL UNINSTALL..."
     echo ""
     log_info "This will remove:"
-    echo "  - Claude Code application (npm uninstall)"
-    echo "  - ~/.claude/ directory (all settings)"
-    echo "  - ~/.claude.json"
-    echo "  - Project-specific .claude/"
-    echo "  - Project-specific .mcp.json"
+    echo "  - Claude Code application"
+    echo "  - All configuration files"
+    echo "  - Project-specific settings"
+    echo ""
+    echo "NOTE: Node.js and NVM will NOT be removed."
     echo ""
 
     read -p "Are you sure you want to continue? (type 'yes' to confirm): " confirm
@@ -157,28 +147,13 @@ full_uninstall() {
 
     if command -v claude &>/dev/null; then
         log_error "Claude Code may still be installed at: $(which claude)"
-        log_error "You may need to manually remove it or use a different uninstall method."
+        log_error "You may need to manually remove it."
     else
         log_success "Claude Code is no longer in PATH"
     fi
 
-    if [ -f "/usr/bin/claude" ]; then
-        log_error "Claude Code still exists at /usr/bin/claude"
-        log_info "To remove manually, run: sudo rm /usr/bin/claude"
-    fi
-
     echo ""
     log_success "FULL UNINSTALL COMPLETE!"
-    echo ""
-    echo "What was removed:"
-    echo "  - Claude Code application"
-    echo "  - All configuration files"
-    echo "  - Project-specific settings"
-    echo ""
-    echo "What was NOT removed:"
-    echo "  - Node.js and npm"
-    echo "  - NVM (Node Version Manager)"
-    echo "  - Your shell configuration files"
     echo ""
     echo "To reinstall, run: ./install_minimax.sh"
 }
@@ -240,9 +215,8 @@ config_only_uninstall() {
     echo ""
     log_success "MINIMAX CONFIGURATION REMOVED!"
     echo ""
-    echo "Claude Code is still installed. To:"
-    echo "  - Reconfigure MiniMax: ./install_minimax.sh"
-    echo "  - Uninstall Claude completely: Run this script and select FULL UNINSTALL"
+    echo "Claude Code is still installed."
+    echo "To reconfigure MiniMax, run: ./install_minimax.sh"
 }
 
 # ========================
@@ -259,15 +233,8 @@ main() {
     echo ""
     echo "Select uninstall option:"
     echo ""
-    echo "  1) FULL UNINSTALL (WARNING: Removes everything)"
-    echo "     - Claude Code application"
-    echo "     - All configuration files"
-    echo "     - Use this to completely remove Claude Code"
-    echo ""
-    echo "  2) MiniMax Config Only (Safer)"
-    echo "     - Removes only MiniMax settings"
-    echo "     - Keeps Claude Code installed"
-    echo ""
+    echo "  1) FULL UNINSTALL - Removes everything"
+    echo "  2) MiniMax Config Only - Keeps Claude Code"
     echo "  3) Cancel"
     echo ""
 

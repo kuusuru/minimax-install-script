@@ -89,6 +89,41 @@ install_nodejs() {
             exit 1
             ;;
     esac
+
+    # Add NVM to shell profile for future sessions
+    add_nvm_to_shell_profile
+}
+
+add_nvm_to_shell_profile() {
+    local nvm_export='export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"'
+
+    # Detect shell config file
+    local shell_config=""
+    if [ -n "${ZSH_VERSION:-}" ]; then
+        shell_config="$HOME/.zshrc"
+    else
+        shell_config="$HOME/.bashrc"
+    fi
+
+    # Check if already added
+    if grep -q "NVM_DIR=\"\$HOME/.nvm\"" "$shell_config" 2>/dev/null; then
+        log_info "NVM already configured in $shell_config"
+        return 0
+    fi
+
+    log_info "Adding NVM to $shell_config..."
+
+    # Append NVM configuration
+    {
+        echo ""
+        echo "# NVM (added by minimax-install-script)"
+        echo "$nvm_export"
+    } >> "$shell_config"
+
+    log_success "NVM added to $shell_config"
+    log_info "Restart your terminal or run: source $shell_config"
 }
 
 check_nodejs() {
