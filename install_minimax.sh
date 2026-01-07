@@ -235,31 +235,28 @@ main() {
         echo ""
         log_info "Claude Code is already installed on this system."
         echo ""
-        echo "To reinstall or update, you have two options:"
+        echo "Do you want to adapt your existing installation to use MiniMax?"
         echo ""
-        echo "  1) Run uninstall_minimax.sh and select FULL UNINSTALL"
-        echo "     (Complete removal, then reinstall fresh)"
+        echo "  1) Yes - Configure MiniMax (keeps Claude Code, updates settings)"
+        echo "  2) No - Exit (use uninstall_minimax.sh for full removal)"
         echo ""
-        echo "  2) Run uninstall_minimax.sh and select 'MiniMax Config Only'"
-        echo "     (Keep Claude Code, just reconfigure MiniMax)"
-        echo ""
-        echo "To proceed with a fresh install, exit and run:"
-        echo "  ./uninstall_minimax.sh"
-        echo ""
-        read -p "Continue anyway and just update configuration? (y/N): " confirm
+        read -p "Enter choice (1 or 2): " choice
         echo ""
 
-        if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
-            log_info "Exiting. Run ./uninstall_minimax.sh first."
+        if [ "$choice" != "1" ]; then
+            log_info "Exiting. Run ./uninstall_minimax.sh if you want to remove Claude Code."
             exit 0
         fi
 
-        log_info "Proceeding to update MiniMax configuration only..."
+        log_info "Configuring your existing Claude Code for MiniMax..."
+        SKIP_INSTALL=1
+    else
+        SKIP_INSTALL=0
     fi
 
     check_nodejs
 
-    if ! command -v claude &>/dev/null; then
+    if [ "$SKIP_INSTALL" -eq 0 ] && ! command -v claude &>/dev/null; then
         install_claude_code
     fi
 

@@ -61,21 +61,20 @@ Keeps Claude Code installed. Use this to just reconfigure MiniMax.
 
 Note: Node.js and NVM are never removed by this script.
 
-## Reinstalling
+## Adapting Existing Installation
 
-If Claude Code is already installed, the installer will detect it and prompt you to use the uninstall script first. To reinstall:
+If Claude Code is already installed, the installer will detect it and ask:
 
-```bash
-# Option 1: Complete fresh install
-./uninstall_minimax.sh
-# Select "1) FULL UNINSTALL"
-./install_minimax.sh
-
-# Option 2: Just reconfigure MiniMax (keep Claude Code)
-./uninstall_minimax.sh
-# Select "2) MiniMax Config Only"
-./install_minimax.sh
 ```
+Claude Code is already installed on this system.
+
+Do you want to adapt your existing installation to use MiniMax?
+
+  1) Yes - Configure MiniMax (keeps Claude Code, updates settings)
+  2) No - Exit (use uninstall_minimax.sh for full removal)
+```
+
+Select option 1 to configure your existing Claude Code to use MiniMax without reinstallation.
 
 ## Troubleshooting
 
