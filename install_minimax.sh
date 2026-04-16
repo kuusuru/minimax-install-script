@@ -94,12 +94,15 @@ select_region() {
 select_model() {
     echo "Select your MiniMax model:"
     echo "  1) MiniMax-M2.7          (~50 TPS normal, 100 TPS off-peak)"
-    echo "  2) MiniMax-M2.7-highspeed (~100 TPS sustained)"
+    echo "  2) MiniMax-M2.7-highspeed (~100 TPS sustained, Token Plan only)"
     echo "  3) MiniMax-M2.5"
-    echo "  4) MiniMax-M2.5-highspeed"
+    echo "  4) MiniMax-M2.5-highspeed (Token Plan only)"
     echo "  5) MiniMax-M2.1"
     echo "  6) MiniMax-M2"
     echo "  7) Custom (enter manually)"
+    echo ""
+    echo "Note: '-highspeed' models require a Token Plan subscription."
+    echo "      They will not work with Starter, Plus, or Max packages."
     echo ""
     read -p "Enter choice (1-7): " choice
     echo ""
