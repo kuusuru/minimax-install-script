@@ -93,8 +93,8 @@ select_region() {
 
 select_model() {
     echo "Select your MiniMax model:"
-    echo "  1) MiniMax-M2.7"
-    echo "  2) MiniMax-M2.7-highspeed"
+    echo "  1) MiniMax-M2.7          (~50 TPS normal, 100 TPS off-peak)"
+    echo "  2) MiniMax-M2.7-highspeed (~100 TPS sustained)"
     echo "  3) MiniMax-M2.5"
     echo "  4) MiniMax-M2.5-highspeed"
     echo "  5) MiniMax-M2.1"
