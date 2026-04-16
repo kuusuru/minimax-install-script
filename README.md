@@ -12,7 +12,9 @@ Installs and configures Claude Code to use MiniMax models via the Token Plan API
 
 - Installs Claude Code via the official bootstrap script
 - Supports region selection (International or China) with appropriate API endpoints
-- Model selection: M2.7, M2.1, M1, or M1-80K
+- Model selection: M2.7, M2.7-hs, M2.5, M2.5-hs, M2.1, M2, or Custom
+- Optional MiniMax MCP server (web_search, understand_image)
+- Token Plan and Pay-As-You-Go billing support
 
 ## Usage
 
@@ -25,9 +27,10 @@ chmod +x install_minimax.sh
 
 The script will prompt for:
 1. Region (International or China)
-2. Model (M2.7, M2.1, M1, M1-80K)
+2. Model (M2.7, M2.7-hs, M2.5, M2.5-hs, M2.1, M2, or Custom)
 3. Billing type (Token Plan or Pay-As-You-Go)
 4. API key
+5. Optional MCP server installation (web_search, understand_image)
 
 After installation:
 ```bash
@@ -52,6 +55,17 @@ claude
 | MiniMax-M2.1 | Stable model |
 | MiniMax-M2 | Base model |
 | Custom | Enter any model name manually |
+
+## MCP Server (Optional)
+
+MiniMax Token Plan MCP provides two exclusive tools:
+
+- **web_search** - Search the web for current information
+- **understand_image** - Analyze and understand image content
+
+The script will ask if you want to install the MCP server. Requires [uv](https://astral.sh/uv) (installed automatically if missing).
+
+MCP configuration is added to `~/.claude/settings.json`. Restart Claude Code after installation for MCP tools to appear.
 
 ## Uninstall
 

@@ -362,6 +362,110 @@ configure_claude() {
 }
 
 # ========================
+#      MCP Server Installation
+# ========================
+
+configure_mcp_servers() {
+    log_info "Configuring MiniMax MCP servers..."
+
+    local settings_file="$HOME/.claude/settings.json"
+
+    # Read current settings or create new
+    local settings_json
+    if [ -f "$settings_file" ]; then
+        settings_json=$(cat "$settings_file")
+    else
+        settings_json="{}"
+    fi
+
+    # Determine API host based on API_BASE_URL
+    local api_host
+    if [[ "$API_BASE_URL" == *"minimaxi.com"* ]]; then
+        api_host="https://api.minimaxi.com"
+    else
+        api_host="https://api.minimax.io"
+    fi
+
+    # Read existing API key from settings
+    local existing_key=""
+    if [ -f "$settings_file" ]; then
+        existing_key=$(node --eval "
+            const fs = require('fs');
+            const path = require('path');
+            const settings = JSON.parse(fs.readFileSync(path.join(process.env.HOME, '.claude', 'settings.json'), 'utf-8'));
+            console.log(settings.env?.ANTHROPIC_AUTH_TOKEN || '');
+        " 2>/dev/null || echo "")
+    fi
+
+    local api_key="${MINIMAX_API_KEY:-$existing_key}"
+
+    if [ -z "$api_key" ]; then
+        log_info "No API key found. Skipping MCP server configuration."
+        return 0
+    fi
+
+    # Build mcpServers JSON
+    local mcp_json="{\"mcpServers\":{\"MiniMax\":{\"command\":\"uvx\",\"args\":[\"minimax-coding-plan-mcp\",\"-y\"],\"env\":{\"MINIMAX_API_KEY\":\"$api_key\",\"MINIMAX_API_HOST\":\"$api_host\"}}}}"
+
+    # Merge with existing settings
+    node --eval "
+        const fs = require('fs');
+        const path = require('path');
+        const settingsPath = path.join(process.env.HOME, '.claude', 'settings.json');
+        let settings = {};
+        try {
+            if (fs.existsSync(settingsPath)) {
+                settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+            }
+        } catch (e) {}
+        const mcp = $mcp_json;
+        if (!settings.mcpServers) settings.mcpServers = {};
+        settings.mcpServers = { ...settings.mcpServers, ...mcp.mcpServers };
+        fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2), 'utf-8');
+    "
+
+    log_success "MiniMax MCP server configured."
+}
+
+install_mcp_servers() {
+    echo ""
+    echo "=============================================="
+    echo "   MiniMax MCP Server (web_search, understand_image)"
+    echo "=============================================="
+    echo ""
+    echo "Token Plan MCP provides two exclusive tools for coding:"
+    echo "  - web_search: Search the web for current information"
+    echo "  - understand_image: Analyze and understand image content"
+    echo ""
+    echo "The MCP server requires uv (Python package installer)."
+    echo ""
+
+    local install_mcp="n"
+    read -p "Install MiniMax MCP server? (y/N): " install_mcp
+    echo ""
+
+    if [[ "$install_mcp" =~ ^[Yy]$ ]]; then
+        # Check for uv
+        if ! command -v uv &>/dev/null; then
+            log_info "Installing uv..."
+            curl -LsSf https://astral.sh/uv/install.sh | sh
+            export PATH="$HOME/.local/bin:$PATH"
+        fi
+
+        # Install the MCP server globally
+        uvx minimax-coding-plan-mcp -y 2>/dev/null || log_info "uvx install attempted (may need manual config in settings.json)"
+
+        configure_mcp_servers
+
+        log_success "MiniMax MCP server installed."
+        echo ""
+        echo "Note: Restart Claude Code for MCP tools to appear."
+    else
+        log_info "Skipping MCP server installation."
+    fi
+}
+
+# ========================
 #          Main
 # ========================
 
@@ -405,6 +509,7 @@ main() {
 
     configure_claude_json
     configure_claude
+    install_mcp_servers
 
     # Final cache clear
     hash -r
