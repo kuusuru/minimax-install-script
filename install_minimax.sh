@@ -93,12 +93,14 @@ select_region() {
 
 select_model() {
     echo "Select your MiniMax model:"
-    echo "  1) MiniMax-M2.7  - Latest model, best for complex tasks"
-    echo "  2) MiniMax-M2.1   - Stable model, good balance"
-    echo "  3) MiniMax-M1     - Base model"
-    echo "  4) MiniMax-M1-80K - Extended context base model"
+    echo "  1) MiniMax-M2.7          - Latest model, best for complex tasks"
+    echo "  2) MiniMax-M2.7-highspeed - Premium speed tier"
+    echo "  3) MiniMax-M2.5          - Balanced performance"
+    echo "  4) MiniMax-M2.5-highspeed - Premium speed tier"
+    echo "  5) MiniMax-M2.1          - Stable model"
+    echo "  6) MiniMax-M2            - Base model"
     echo ""
-    read -p "Enter choice (1-4): " choice
+    read -p "Enter choice (1-6): " choice
     echo ""
 
     case "$choice" in
@@ -108,22 +110,32 @@ select_model() {
             return 0
             ;;
         2)
-            MINIMAX_MODEL="MiniMax-M2.1"
+            MINIMAX_MODEL="MiniMax-M2.7-highspeed"
             log_info "Selected model: $MINIMAX_MODEL"
             return 0
             ;;
         3)
-            MINIMAX_MODEL="MiniMax-M1"
+            MINIMAX_MODEL="MiniMax-M2.5"
             log_info "Selected model: $MINIMAX_MODEL"
             return 0
             ;;
         4)
-            MINIMAX_MODEL="MiniMax-M1-80K"
+            MINIMAX_MODEL="MiniMax-M2.5-highspeed"
+            log_info "Selected model: $MINIMAX_MODEL"
+            return 0
+            ;;
+        5)
+            MINIMAX_MODEL="MiniMax-M2.1"
+            log_info "Selected model: $MINIMAX_MODEL"
+            return 0
+            ;;
+        6)
+            MINIMAX_MODEL="MiniMax-M2"
             log_info "Selected model: $MINIMAX_MODEL"
             return 0
             ;;
         *)
-            log_error "Invalid choice. Please enter 1-4."
+            log_error "Invalid choice. Please enter 1-6."
             select_model
             ;;
     esac
