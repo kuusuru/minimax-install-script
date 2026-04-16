@@ -476,6 +476,9 @@ configure_mcp_servers() {
         api_host="https://api.minimax.io"
     fi
 
+    # Export MINIMAX_SETTINGS_FILE BEFORE the first Node.js call that reads it
+    export MINIMAX_SETTINGS_FILE="$settings_file"
+
     # Read existing API key from settings.json
     local api_key
     api_key=$(node -e "
@@ -490,13 +493,13 @@ configure_mcp_servers() {
 
     if [ -z "$api_key" ]; then
         log_info "No API key found in settings. Skipping MCP server configuration."
+        unset MINIMAX_SETTINGS_FILE
         return 0
     fi
 
-    # Export values as env vars for Node.js (no shell injection)
+    # Export remaining values as env vars for the second Node.js call
     export MINIMAX_API_KEY="$api_key"
     export MINIMAX_API_HOST="$api_host"
-    export MINIMAX_SETTINGS_FILE="$settings_file"
 
     # Merge MiniMax MCP config into settings.json
     node -e "
