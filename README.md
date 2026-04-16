@@ -45,8 +45,8 @@ claude
 
 | Model | Description |
 |-------|-------------|
-| MiniMax-M2.7 | Default model |
-| MiniMax-M2.7-highspeed | Premium speed tier |
+| MiniMax-M2.7 | ~50 TPS normal, 100 TPS off-peak |
+| MiniMax-M2.7-highspeed | ~100 TPS sustained |
 | MiniMax-M2.5 | Balanced performance |
 | MiniMax-M2.5-highspeed | Premium speed tier |
 | MiniMax-M2.1 | Stable model |
