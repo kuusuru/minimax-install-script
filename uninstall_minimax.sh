@@ -113,7 +113,7 @@ full_uninstall() {
     # 2. Remove MCP config (the mcpServers entry is auto-removed when Claude Code fetches it)
     log_info "Removing MiniMax MCP configuration..."
     if [ -f "$CONFIG_DIR/settings.json" ]; then
-        node --eval '
+        if ! node -e '
             const fs = require("fs");
             const path = require("path");
             const filePath = path.join(process.env.HOME, ".claude", "settings.json");
@@ -122,9 +122,15 @@ full_uninstall() {
                 if (settings.mcpServers) delete settings.mcpServers.MiniMax;
                 if (settings.mcpServers && Object.keys(settings.mcpServers).length === 0) delete settings.mcpServers;
                 fs.writeFileSync(filePath, JSON.stringify(settings, null, 2), "utf-8");
-            } catch (e) {}
-        '
-        log_success "Removed MiniMax MCP config"
+            } catch (e) {
+                console.error("Error:", e.message);
+                process.exit(1);
+            }
+        ' 2>&1; then
+            log_error "Failed to update settings.json. Check file permissions."
+        else
+            log_success "Removed MiniMax MCP config"
+        fi
     fi
 
     # 3. Remove configuration directories
@@ -205,7 +211,7 @@ config_only_uninstall() {
 
     # 1. Remove MiniMax-specific config from settings.json (preserve other settings)
     if [ -f "$CONFIG_DIR/settings.json" ]; then
-        node --eval '
+        if ! node -e '
             const fs = require("fs");
             const path = require("path");
             const filePath = path.join(process.env.HOME, ".claude", "settings.json");
@@ -231,9 +237,15 @@ config_only_uninstall() {
                 if (settings.env && Object.keys(settings.env).length === 0) delete settings.env;
                 if (settings.mcpServers && Object.keys(settings.mcpServers).length === 0) delete settings.mcpServers;
                 fs.writeFileSync(filePath, JSON.stringify(settings, null, 2), "utf-8");
-            } catch (e) {}
-        '
-        log_success "Removed MiniMax config from $CONFIG_DIR/settings.json"
+            } catch (e) {
+                console.error("Error:", e.message);
+                process.exit(1);
+            }
+        ' 2>&1; then
+            log_error "Failed to update settings.json. Check file permissions."
+        else
+            log_success "Removed MiniMax config from $CONFIG_DIR/settings.json"
+        fi
     else
         log_info "No settings.json found."
     fi
