@@ -1,146 +1,49 @@
 # MiniMax Claude Code Installer
 
-Automated installer for using MiniMax-M2.7 with Claude Code, adapted for the MiniMax Token Plan.
-
-## Credits
-
-This installer is adapted from:
-- [MiniMax Claude Code Documentation](https://platform.minimax.io/docs/token-plan/claude-code)
-- [Claude Code Bootstrap](https://downloads.claude.ai/claude-code-releases/bootstrap.sh)
-- Original script from Z.ai
+Installs and configures Claude Code to use MiniMax-M2.7 via the Token Plan API.
 
 ## Prerequisites
 
-- **Operating System:** Linux or macOS
-- **Node.js:** Version 18 or higher (will be installed automatically if missing)
-- **MiniMax API Key:** Get from https://platform.minimax.io/user-center/payment/token-plan
+- Linux or macOS
+- Node.js 18+ (script installs via NVM if missing)
+- MiniMax API key from https://platform.minimax.io/user-center/payment/token-plan
 
-> **Note:** This installer is specifically adapted for the MiniMax Token Plan. If you have a Pay-As-You-Go platform key, you can still use it - just select option 2 when prompted for your billing type.
+## What This Script Does
 
-## Features
+1. Installs Claude Code via the official bootstrap script
+2. Prompts for region (International or China) to set the correct API endpoint
+3. Configures all Claude Code model variants to use MiniMax-M2.7
 
-- Installs Claude Code using the official bootstrap script
-- Supports both **International** and **China (Mainland)** users with appropriate API endpoints:
-  - International: `https://api.minimax.io/anthropic`
-  - China: `https://api.minimaxi.com/anthropic`
-- Configures all Claude Code model variants to use MiniMax-M2.7
-
-## Installation
-
-### 1. Clone and run the installer
+## Usage
 
 ```bash
-# Clone the repository
 git clone https://github.com/kuusuru/minimax-install-script.git
-
-# Navigate to the directory
 cd minimax-install-script
-
-# Make the installer executable
 chmod +x install_minimax.sh
-
-# Run the installer
 ./install_minimax.sh
 ```
 
-The installer will:
-1. Check/install Node.js via NVM (if not present)
-2. Install Claude Code using the official bootstrap script (if not already installed)
-3. Configure Claude Code with your MiniMax credentials
-4. Set all model variants to use MiniMax-M2.7
-
-### 2. Get your MiniMax API Key
-
-When prompted, select your billing type and get your API key from:
-- **Token Plan**: https://platform.minimax.io/user-center/payment/token-plan
-- **Pay-As-You-Go**: https://platform.minimax.io/user-center/basic-information/interface-key
-
-### 3. Start using Claude Code
+When prompted:
+- Select billing type (Token Plan or Pay-As-You-Go)
+- Select region (International or China)
+- Paste your MiniMax API key
 
 After installation:
+```bash
+cd /your/project
+source ~/.bashrc  # or open a new terminal
+claude
+```
 
-1. **Switch to your project folder** before running claude:
-   ```bash
-   cd /path/to/your/project
-   ```
+## API Endpoints
 
-2. **Enable claude in current terminal:**
-   ```bash
-   source ~/.bashrc
-   ```
-   Or simply open a new terminal window.
+- International: `https://api.minimax.io/anthropic`
+- China: `https://api.minimaxi.com/anthropic`
 
-3. **Run claude:**
-   ```bash
-   claude
-   ```
-
-> **Note:** NVM is automatically added to `~/.bashrc` during installation. If claude doesn't work after switching terminals, run `source ~/.bashrc`.
-
-## Uninstallation
-
-### 1. Clone and run the uninstaller (if not already cloned)
+## Uninstall
 
 ```bash
-# Clone the repository (if not already cloned)
-git clone https://github.com/kuusuru/minimax-install-script.git
-
-# Navigate to the directory
-cd minimax-install-script
-
-# Make the uninstaller executable
-chmod +x uninstall_minimax.sh
-
-# Run the uninstaller
 ./uninstall_minimax.sh
 ```
 
-The uninstaller offers two options:
-
-### 1) Full Uninstall
-Removes EVERYTHING:
-- Claude Code application
-- All configuration files (`.claude/`, `.mcp.json`, etc.)
-
-Use this to completely remove Claude Code from your system.
-
-### 2) MiniMax Config Only (Safer)
-Removes only MiniMax settings:
-- `~/.claude/settings.json`
-- `~/.claude.json`
-- Project-specific `.claude/` and `.mcp.json`
-
-Keeps Claude Code installed. Use this to just reconfigure MiniMax.
-
-Note: Node.js and NVM are never removed by this script.
-
-### After Uninstallation
-
-If you get "command not found" for claude, run:
-```bash
-hash -r
-```
-Or simply open a new terminal window.
-
-## Adapting Existing Installation
-
-If Claude Code is already installed, the installer will detect it and ask:
-
-```
-Claude Code is already installed on this system.
-
-Do you want to adapt your existing installation to use MiniMax?
-
-  1) Yes - Configure MiniMax (keeps Claude Code, updates settings)
-  2) No - Exit (use uninstall_minimax.sh for full removal)
-```
-
-Select option 1 to configure your existing Claude Code to use MiniMax without reinstallation.
-
-## Troubleshooting
-
-If you encounter issues, ensure you've cleared any existing Anthropic environment variables:
-```bash
-unset ANTHROPIC_AUTH_TOKEN
-unset ANTHROPIC_BASE_URL
-```
+Choose "MiniMax Config Only" to keep Claude Code installed.
