@@ -1,14 +1,15 @@
 #!/bin/bash
 #
-# MiniMax Claude Code Installer (Coding Plan Edition)
+# MiniMax Claude Code Installer (Token Plan Edition)
 # Adapted from:
-#   - https://platform.minimax.io/docs/guides/text-ai-coding-tools
+#   - https://platform.minimax.io/docs/token-plan/claude-code
+#   - https://downloads.claude.ai/claude-code-releases/bootstrap.sh
 #   - Original script from Z.ai
 #
 # Prerequisites:
 #   - Linux or macOS
 #   - Node.js 18+ (will be installed if missing)
-#   - MiniMax Coding Plan API Key
+#   - MiniMax Token Plan API Key
 #
 
 set -euo pipefail
@@ -23,14 +24,15 @@ NVM_VERSION="v0.40.3"
 CLAUDE_PACKAGE="@anthropic-ai/claude-code"
 CONFIG_DIR="$HOME/.claude"
 
-# MiniMax Constants
-API_BASE_URL="https://api.minimax.io/anthropic"
-API_TIMEOUT_MS=3000000
-MINIMAX_MODEL="MiniMax-M2.1"
+# MiniMax Model
+MINIMAX_MODEL="MiniMax-M2.7"
 
 # API Key URLs
-CODING_PLAN_URL="https://platform.minimax.io/user-center/payment/coding-plan"
+TOKEN_PLAN_URL="https://platform.minimax.io/user-center/payment/token-plan"
 PLATFORM_URL="https://platform.minimax.io/user-center/basic-information/interface-key"
+
+# Claude Code bootstrap URL
+CLAUDE_BOOTSTRAP_URL="https://downloads.claude.ai/claude-code-releases/bootstrap.sh"
 
 # ========================
 #        Functions
@@ -56,6 +58,36 @@ ensure_dir_exists() {
             exit 1
         }
     fi
+}
+
+# ========================
+#      Region Selection
+# ========================
+
+select_region() {
+    echo "Select your region:"
+    echo "  1) International (outside China) - uses api.minimax.io"
+    echo "  2) China (Mainland) - uses api.minimaxi.com"
+    echo ""
+    read -p "Enter choice (1 or 2): " choice
+    echo ""
+
+    case "$choice" in
+        1)
+            API_BASE_URL="https://api.minimax.io/anthropic"
+            log_info "Selected International endpoint: $API_BASE_URL"
+            return 0
+            ;;
+        2)
+            API_BASE_URL="https://api.minimaxi.com/anthropic"
+            log_info "Selected China endpoint: $API_BASE_URL"
+            return 0
+            ;;
+        *)
+            log_error "Invalid choice. Please enter 1 or 2."
+            select_region
+            ;;
+    esac
 }
 
 # ========================
@@ -166,10 +198,15 @@ install_claude_code() {
     # Fix the "No such file or directory" bash cache error
     hash -r
 
-    log_info "Installing Claude Code..."
-    npm install -g "$CLAUDE_PACKAGE" || {
-        log_error "NPM installation failed."
-        exit 1
+    log_info "Installing Claude Code using official bootstrap script..."
+
+    # Download and run the official Claude Code bootstrap script
+    curl -fsSL "$CLAUDE_BOOTSTRAP_URL" | bash || {
+        log_error "Bootstrap installation failed. Falling back to npm..."
+        npm install -g "$CLAUDE_PACKAGE" || {
+            log_error "NPM installation failed."
+            exit 1
+        }
     }
 }
 
@@ -190,7 +227,7 @@ configure_claude_json(){
 
 select_key_type() {
     echo "Select your MiniMax billing type:"
-    echo "  1) Coding Plan (fixed monthly fee, includes usage)"
+    echo "  1) Token Plan (fixed monthly fee, includes usage)"
     echo "  2) Pay-As-You-Go (pay per usage)"
     echo ""
     read -p "Enter choice (1 or 2): " choice
@@ -198,7 +235,7 @@ select_key_type() {
 
     case "$choice" in
         1)
-            echo " Get your Coding Plan API Key at: $CODING_PLAN_URL"
+            echo " Get your Token Plan API Key at: $TOKEN_PLAN_URL"
             return 0
             ;;
         2)
@@ -213,7 +250,11 @@ select_key_type() {
 }
 
 configure_claude() {
-    log_info "Configuring Claude Code for MiniMax (Coding Plan Edition)..."
+    log_info "Configuring Claude Code for MiniMax (Token Plan Edition)..."
+    echo ""
+
+    # Select region first
+    select_region
     echo ""
 
     select_key_type
@@ -261,7 +302,7 @@ main() {
     echo ""
     echo "=============================================="
     echo "   MiniMax Claude Code Installer"
-    echo "   (Coding Plan Edition)"
+    echo "   (Token Plan Edition)"
     echo "=============================================="
     echo ""
 

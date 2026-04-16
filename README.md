@@ -1,20 +1,29 @@
 # MiniMax Claude Code Installer
 
-Automated installer for using MiniMax-M2.1 with Claude Code, adapted for the MiniMax Coding Plan.
+Automated installer for using MiniMax-M2.7 with Claude Code, adapted for the MiniMax Token Plan.
 
 ## Credits
 
 This installer is adapted from:
-- [MiniMax AI Coding Tools Documentation](https://platform.minimax.io/docs/guides/text-ai-coding-tools)
+- [MiniMax Claude Code Documentation](https://platform.minimax.io/docs/token-plan/claude-code)
+- [Claude Code Bootstrap](https://downloads.claude.ai/claude-code-releases/bootstrap.sh)
 - Original script from Z.ai
 
 ## Prerequisites
 
 - **Operating System:** Linux or macOS
 - **Node.js:** Version 18 or higher (will be installed automatically if missing)
-- **MiniMax API Key:** Get from https://platform.minimax.io/user-center/payment/coding-plan
+- **MiniMax API Key:** Get from https://platform.minimax.io/user-center/payment/token-plan
 
-> **Note:** This installer is specifically adapted for the MiniMax Coding Plan. If you have a Pay-As-You-Go platform key, you can still use it - just select option 2 when prompted for your billing type.
+> **Note:** This installer is specifically adapted for the MiniMax Token Plan. If you have a Pay-As-You-Go platform key, you can still use it - just select option 2 when prompted for your billing type.
+
+## Features
+
+- Installs Claude Code using the official bootstrap script
+- Supports both **International** and **China (Mainland)** users with appropriate API endpoints:
+  - International: `https://api.minimax.io/anthropic`
+  - China: `https://api.minimaxi.com/anthropic`
+- Configures all Claude Code model variants to use MiniMax-M2.7
 
 ## Installation
 
@@ -36,14 +45,14 @@ chmod +x install_minimax.sh
 
 The installer will:
 1. Check/install Node.js via NVM (if not present)
-2. Install Claude Code (if not already installed)
+2. Install Claude Code using the official bootstrap script (if not already installed)
 3. Configure Claude Code with your MiniMax credentials
-4. Set all model variants to use MiniMax-M2.1
+4. Set all model variants to use MiniMax-M2.7
 
 ### 2. Get your MiniMax API Key
 
 When prompted, select your billing type and get your API key from:
-- **Coding Plan**: https://platform.minimax.io/user-center/payment/coding-plan
+- **Token Plan**: https://platform.minimax.io/user-center/payment/token-plan
 - **Pay-As-You-Go**: https://platform.minimax.io/user-center/basic-information/interface-key
 
 ### 3. Start using Claude Code
