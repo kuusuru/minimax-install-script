@@ -49,14 +49,14 @@ claude
 | Model | Description |
 |-------|-------------|
 | MiniMax-M2.7 | ~50 TPS normal, 100 TPS off-peak |
-| MiniMax-M2.7-highspeed | ~100 TPS sustained (Token Plan only) |
+| MiniMax-M2.7-highspeed | ~100 TPS sustained (HS plan only) |
 | MiniMax-M2.5 | Balanced performance |
-| MiniMax-M2.5-highspeed | Premium speed tier (Token Plan only) |
+| MiniMax-M2.5-highspeed | Premium speed tier (HS plan only) |
 | MiniMax-M2.1 | Stable model |
 | MiniMax-M2 | Base model |
 | Custom | Enter any model name manually |
 
-Note: `-highspeed` models require a Token Plan subscription. They will not work with Starter, Plus, or Max packages.
+Note: `-highspeed` models require an HS-tier subscription. Available only with: Plus–HS, Max–HS, or Ultra–HS. Standard plans (Starter, Plus, Max) use the base M2.7.
 
 ## MCP Server (Optional)
 
