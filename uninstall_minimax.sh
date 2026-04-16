@@ -110,7 +110,24 @@ full_uninstall() {
         log_info "Claude Code not found via npm (may have been installed differently)"
     }
 
-    # 2. Remove configuration directories
+    # 2. Remove MCP config (the mcpServers entry is auto-removed when Claude Code fetches it)
+    log_info "Removing MiniMax MCP configuration..."
+    if [ -f "$CONFIG_DIR/settings.json" ]; then
+        node --eval '
+            const fs = require("fs");
+            const path = require("path");
+            const filePath = path.join(process.env.HOME, ".claude", "settings.json");
+            try {
+                const settings = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+                if (settings.mcpServers) delete settings.mcpServers.MiniMax;
+                if (settings.mcpServers && Object.keys(settings.mcpServers).length === 0) delete settings.mcpServers;
+                fs.writeFileSync(filePath, JSON.stringify(settings, null, 2), "utf-8");
+            } catch (e) {}
+        '
+        log_success "Removed MiniMax MCP config"
+    fi
+
+    # 3. Remove configuration directories
     log_info "Removing configuration files..."
 
     if [ -d "$CONFIG_DIR" ]; then
@@ -170,12 +187,12 @@ config_only_uninstall() {
     log_info "Removing MiniMax configuration only..."
     echo ""
     log_info "This will remove:"
-    echo "  - ~/.claude/settings.json (MiniMax config)"
+    echo "  - MiniMax env vars from ~/.claude/settings.json"
+    echo "  - MiniMax mcpServers from ~/.claude/settings.json"
     echo "  - ~/.claude.json"
-    echo "  - Project-specific .claude/"
-    echo "  - Project-specific .mcp.json"
+    echo "  - Project-specific .claude/ and .mcp.json"
     echo ""
-    log_info "Claude Code will remain installed."
+    log_info "Claude Code and other MCP servers will remain configured."
     echo ""
 
     read -p "Continue? (y/N): " confirm
@@ -186,12 +203,37 @@ config_only_uninstall() {
         exit 0
     fi
 
-    # 1. Remove MiniMax configuration
-    log_info "Removing MiniMax configuration files..."
-
+    # 1. Remove MiniMax-specific config from settings.json (preserve other settings)
     if [ -f "$CONFIG_DIR/settings.json" ]; then
-        rm -f "$CONFIG_DIR/settings.json"
-        log_success "Removed $CONFIG_DIR/settings.json"
+        node --eval '
+            const fs = require("fs");
+            const path = require("path");
+            const filePath = path.join(process.env.HOME, ".claude", "settings.json");
+            try {
+                const settings = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+                // Remove MiniMax env vars
+                if (settings.env) {
+                    delete settings.env.ANTHROPIC_AUTH_TOKEN;
+                    delete settings.env.ANTHROPIC_BASE_URL;
+                    delete settings.env.API_TIMEOUT_MS;
+                    delete settings.env.CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC;
+                    delete settings.env.ANTHROPIC_MODEL;
+                    delete settings.env.ANTHROPIC_SMALL_FAST_MODEL;
+                    delete settings.env.ANTHROPIC_DEFAULT_SONNET_MODEL;
+                    delete settings.env.ANTHROPIC_DEFAULT_OPUS_MODEL;
+                    delete settings.env.ANTHROPIC_DEFAULT_HAIKU_MODEL;
+                }
+                // Remove MiniMax MCP server
+                if (settings.mcpServers) {
+                    delete settings.mcpServers.MiniMax;
+                }
+                // Remove empty objects
+                if (settings.env && Object.keys(settings.env).length === 0) delete settings.env;
+                if (settings.mcpServers && Object.keys(settings.mcpServers).length === 0) delete settings.mcpServers;
+                fs.writeFileSync(filePath, JSON.stringify(settings, null, 2), "utf-8");
+            } catch (e) {}
+        '
+        log_success "Removed MiniMax config from $CONFIG_DIR/settings.json"
     else
         log_info "No settings.json found."
     fi
