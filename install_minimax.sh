@@ -339,26 +339,33 @@ configure_claude() {
 
     ensure_dir_exists "$CONFIG_DIR"
 
-    # Write settings.json with MiniMax Model Mapping
+    # Write settings.json with MiniMax Model Mapping (merge with existing settings)
     node --eval '
         const os = require("os");
         const fs = require("fs");
         const path = require("path");
 
         const filePath = path.join(os.homedir(), ".claude", "settings.json");
-        const config = {
-            env: {
-                ANTHROPIC_AUTH_TOKEN: "'"$api_key"'",
-                ANTHROPIC_BASE_URL: "'"$API_BASE_URL"'",
-                API_TIMEOUT_MS: "3000000",
-                CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: 1,
-                ANTHROPIC_MODEL: "'"$MINIMAX_MODEL"'",
-                ANTHROPIC_SMALL_FAST_MODEL: "'"$MINIMAX_MODEL"'",
-                ANTHROPIC_DEFAULT_SONNET_MODEL: "'"$MINIMAX_MODEL"'",
-                ANTHROPIC_DEFAULT_OPUS_MODEL: "'"$MINIMAX_MODEL"'",
-                ANTHROPIC_DEFAULT_HAIKU_MODEL: "'"$MINIMAX_MODEL"'"
+        let config = {};
+        try {
+            if (fs.existsSync(filePath)) {
+                config = JSON.parse(fs.readFileSync(filePath, "utf-8"));
             }
-        };
+        } catch (e) {}
+
+        // Ensure env object exists
+        if (!config.env) config.env = {};
+
+        // Set MiniMax env vars (preserves other env vars)
+        config.env.ANTHROPIC_AUTH_TOKEN = "'"$api_key"'";
+        config.env.ANTHROPIC_BASE_URL = "'"$API_BASE_URL"'";
+        config.env.API_TIMEOUT_MS = "3000000";
+        config.env.CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = 1;
+        config.env.ANTHROPIC_MODEL = "'"$MINIMAX_MODEL"'";
+        config.env.ANTHROPIC_SMALL_FAST_MODEL = "'"$MINIMAX_MODEL"'";
+        config.env.ANTHROPIC_DEFAULT_SONNET_MODEL = "'"$MINIMAX_MODEL"'";
+        config.env.ANTHROPIC_DEFAULT_OPUS_MODEL = "'"$MINIMAX_MODEL"'";
+        config.env.ANTHROPIC_DEFAULT_HAIKU_MODEL = "'"$MINIMAX_MODEL"'";
 
         fs.writeFileSync(filePath, JSON.stringify(config, null, 2), "utf-8");
     '
@@ -449,19 +456,26 @@ install_mcp_servers() {
     echo ""
 
     if [[ "$install_mcp" =~ ^[Yy]$ ]]; then
+        # Load nvm to ensure uv is findable if installed via nvm
+        export NVM_DIR="$HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
         # Check for uv
         if ! command -v uv &>/dev/null; then
             log_info "Installing uv..."
             curl -LsSf https://astral.sh/uv/install.sh | sh
+            # Source the profile to get uv in PATH for this session
+            [ -s "$HOME/.local/bin/env" ] && \. "$HOME/.local/bin/env"
             export PATH="$HOME/.local/bin:$PATH"
         fi
 
-        # Install the MCP server globally
-        uvx minimax-coding-plan-mcp -y 2>/dev/null || log_info "uvx install attempted (may need manual config in settings.json)"
-
+        # uvx runs the package on-the-fly; no separate install step needed.
+        # The settings.json mcpServers entry tells Claude Code to launch it.
+        log_success "MiniMax MCP server ready (configured in settings.json)."
         configure_mcp_servers
 
-        log_success "MiniMax MCP server installed."
+        log_success "MiniMax MCP server configured."
         echo ""
         echo "Note: Restart Claude Code for MCP tools to appear."
     else
