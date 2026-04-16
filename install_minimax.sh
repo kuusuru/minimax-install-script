@@ -17,7 +17,6 @@ set -euo pipefail
 # ========================
 #        Define Constants
 # ========================
-SCRIPT_NAME=$(basename "$0")
 NODE_MIN_VERSION=18
 NODE_INSTALL_VERSION=22
 NVM_VERSION="v0.40.3"
@@ -380,14 +379,6 @@ configure_mcp_servers() {
     log_info "Configuring MiniMax MCP servers..."
 
     local settings_file="$HOME/.claude/settings.json"
-
-    # Read current settings or create new
-    local settings_json
-    if [ -f "$settings_file" ]; then
-        settings_json=$(cat "$settings_file")
-    else
-        settings_json="{}"
-    fi
 
     # Determine API host based on API_BASE_URL
     local api_host
