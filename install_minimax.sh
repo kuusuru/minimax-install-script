@@ -24,9 +24,6 @@ NVM_VERSION="v0.40.3"
 CLAUDE_PACKAGE="@anthropic-ai/claude-code"
 CONFIG_DIR="$HOME/.claude"
 
-# MiniMax Model
-MINIMAX_MODEL="MiniMax-M2.7"
-
 # API Key URLs
 TOKEN_PLAN_URL="https://platform.minimax.io/user-center/payment/token-plan"
 PLATFORM_URL="https://platform.minimax.io/user-center/basic-information/interface-key"
@@ -86,6 +83,48 @@ select_region() {
         *)
             log_error "Invalid choice. Please enter 1 or 2."
             select_region
+            ;;
+    esac
+}
+
+# ========================
+#      Model Selection
+# ========================
+
+select_model() {
+    echo "Select your MiniMax model:"
+    echo "  1) MiniMax-M2.7  - Latest model, best for complex tasks"
+    echo "  2) MiniMax-M2.1   - Stable model, good balance"
+    echo "  3) MiniMax-M1     - Base model"
+    echo "  4) MiniMax-M1-80K - Extended context base model"
+    echo ""
+    read -p "Enter choice (1-4): " choice
+    echo ""
+
+    case "$choice" in
+        1)
+            MINIMAX_MODEL="MiniMax-M2.7"
+            log_info "Selected model: $MINIMAX_MODEL"
+            return 0
+            ;;
+        2)
+            MINIMAX_MODEL="MiniMax-M2.1"
+            log_info "Selected model: $MINIMAX_MODEL"
+            return 0
+            ;;
+        3)
+            MINIMAX_MODEL="MiniMax-M1"
+            log_info "Selected model: $MINIMAX_MODEL"
+            return 0
+            ;;
+        4)
+            MINIMAX_MODEL="MiniMax-M1-80K"
+            log_info "Selected model: $MINIMAX_MODEL"
+            return 0
+            ;;
+        *)
+            log_error "Invalid choice. Please enter 1-4."
+            select_model
             ;;
     esac
 }
@@ -188,7 +227,7 @@ check_claude_code() {
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
     if command -v claude &>/dev/null; then
-        log_success "Claude Code is already installed."
+        log_success "Claude Code is already installed: $(claude --version 2>/dev/null || echo 'unknown version')"
         return 0
     fi
     return 1
@@ -208,6 +247,7 @@ install_claude_code() {
             exit 1
         }
     }
+    log_success "Claude Code installed successfully"
 }
 
 configure_claude_json(){
@@ -255,6 +295,10 @@ configure_claude() {
 
     # Select region first
     select_region
+    echo ""
+
+    # Select model
+    select_model
     echo ""
 
     select_key_type
