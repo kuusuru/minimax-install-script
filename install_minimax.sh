@@ -93,14 +93,15 @@ select_region() {
 
 select_model() {
     echo "Select your MiniMax model:"
-    echo "  1) MiniMax-M2.7          - Latest model, best for complex tasks"
-    echo "  2) MiniMax-M2.7-highspeed - Premium speed tier"
-    echo "  3) MiniMax-M2.5          - Balanced performance"
-    echo "  4) MiniMax-M2.5-highspeed - Premium speed tier"
-    echo "  5) MiniMax-M2.1          - Stable model"
-    echo "  6) MiniMax-M2            - Base model"
+    echo "  1) MiniMax-M2.7"
+    echo "  2) MiniMax-M2.7-highspeed"
+    echo "  3) MiniMax-M2.5"
+    echo "  4) MiniMax-M2.5-highspeed"
+    echo "  5) MiniMax-M2.1"
+    echo "  6) MiniMax-M2"
+    echo "  7) Custom (enter manually)"
     echo ""
-    read -p "Enter choice (1-6): " choice
+    read -p "Enter choice (1-7): " choice
     echo ""
 
     case "$choice" in
@@ -134,8 +135,18 @@ select_model() {
             log_info "Selected model: $MINIMAX_MODEL"
             return 0
             ;;
+        7)
+            read -p "Enter custom model name: " MINIMAX_MODEL
+            echo ""
+            if [ -z "$MINIMAX_MODEL" ]; then
+                log_error "Model name cannot be empty."
+                select_model
+            fi
+            log_info "Selected custom model: $MINIMAX_MODEL"
+            return 0
+            ;;
         *)
-            log_error "Invalid choice. Please enter 1-6."
+            log_error "Invalid choice. Please enter 1-7."
             select_model
             ;;
     esac

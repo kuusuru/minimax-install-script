@@ -45,12 +45,13 @@ claude
 
 | Model | Description |
 |-------|-------------|
-| MiniMax-M2.7 | Latest model, best for complex tasks |
+| MiniMax-M2.7 | Default model |
 | MiniMax-M2.7-highspeed | Premium speed tier |
 | MiniMax-M2.5 | Balanced performance |
 | MiniMax-M2.5-highspeed | Premium speed tier |
 | MiniMax-M2.1 | Stable model |
 | MiniMax-M2 | Base model |
+| Custom | Enter any model name manually |
 
 ## Uninstall
 
