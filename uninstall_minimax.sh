@@ -28,6 +28,12 @@
 #    This keeps Claude Code installed but removes MiniMax configuration.
 #    You can reconfigure MiniMax by running install_minimax.sh again.
 #
+# NOTE: Neither option removes Node.js, NVM, or the NVM lines that were
+#       added to your shell config (e.g. ~/.bashrc or ~/.zshrc) during
+#       installation. To remove those, open the file in a text editor and
+#       delete the lines between the '# NVM (added by minimax-install-script)'
+#       markers.
+#
 # =============================================================================
 #
 
@@ -52,7 +58,8 @@ log_error() {
 # ========================
 
 check_claude_location() {
-    log_info "Checking Claude Code installation location..."
+    # All log_info calls go to stderr so they don't pollute command substitution
+    log_info "Checking Claude Code installation location..." >&2
 
     local claude_path=""
 
@@ -67,9 +74,9 @@ check_claude_location() {
     # Check via which command
     if command -v claude &>/dev/null; then
         claude_path=$(which claude 2>/dev/null || true)
-        log_info "Claude Code found at: $claude_path"
+        log_info "Claude Code found at: $claude_path" >&2
     else
-        log_info "Claude Code not found in PATH"
+        log_info "Claude Code not found in PATH" >&2
     fi
 
     echo "$claude_path"
@@ -89,6 +96,8 @@ full_uninstall() {
     echo "  - Project-specific settings"
     echo ""
     echo "NOTE: Node.js and NVM will NOT be removed."
+    echo "      NVM shell config lines will NOT be removed automatically."
+    echo "      See the script header for instructions to remove them manually."
     echo ""
 
     read -p "Are you sure you want to continue? (type 'yes' to confirm): " confirm
@@ -146,7 +155,7 @@ full_uninstall() {
         log_success "Removed $HOME/.claude.json"
     fi
 
-    # 3. Remove project-specific settings (from current directory)
+    # 4. Remove project-specific settings (from current directory)
     if [ -d ".claude" ]; then
         rm -rf ".claude"
         log_success "Removed .claude/ (project settings)"
@@ -157,10 +166,10 @@ full_uninstall() {
         log_success "Removed .mcp.json"
     fi
 
-    # 4. Clear terminal cache
+    # 5. Clear terminal cache
     hash -r
 
-    # 5. Verify removal
+    # 6. Verify removal
     log_info "Verifying removal..."
 
     # Load nvm again to check properly

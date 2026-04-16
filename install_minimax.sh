@@ -7,7 +7,7 @@
 #   - Original script from Z.ai
 #
 # Prerequisites:
-#   - Linux or macOS
+#   - Linux or macOS (requires bash)
 #   - Node.js 18+ (script installs via NVM if missing)
 #   - MiniMax Token Plan API Key
 #
@@ -162,24 +162,30 @@ select_model() {
 # ========================
 
 install_nodejs() {
-    local platform=$(uname -s)
+    local platform
+    platform=$(uname -s)
 
     case "$platform" in
         Linux|Darwin)
             log_info "Installing Node.js via NVM..."
 
-            # Install nvm — fail fast on error
+            # Install nvm — use mktemp to avoid /tmp race conditions
             log_info "Downloading NVM..."
-            if ! curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh" -o /tmp/nvm_install.sh; then
+            local nvm_tmp
+            nvm_tmp=$(mktemp /tmp/nvm_install.XXXXXX.sh)
+            if ! curl -fsSL --connect-timeout 30 --max-time 120 \
+                "https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh" \
+                -o "$nvm_tmp"; then
                 log_error "NVM download failed. Check your network connection."
+                rm -f "$nvm_tmp"
                 exit 1
             fi
-            bash /tmp/nvm_install.sh || {
+            bash "$nvm_tmp" || {
                 log_error "NVM installation script failed."
-                rm -f /tmp/nvm_install.sh
+                rm -f "$nvm_tmp"
                 exit 1
             }
-            rm -f /tmp/nvm_install.sh
+            rm -f "$nvm_tmp"
 
             # Load nvm into current session
             export NVM_DIR="$HOME/.nvm"
@@ -222,11 +228,13 @@ add_nvm_to_shell_profile() {
             shell_config="$HOME/.bashrc"
             ;;
         *)
-            # Fallback: check for zshrc first, then bashrc
+            # Fallback: check for common shell configs, then .profile (POSIX standard)
             if [ -f "$HOME/.zshrc" ]; then
                 shell_config="$HOME/.zshrc"
-            else
+            elif [ -f "$HOME/.bashrc" ]; then
                 shell_config="$HOME/.bashrc"
+            else
+                shell_config="$HOME/.profile"
             fi
             ;;
     esac
@@ -259,7 +267,9 @@ check_nodejs() {
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
     if command -v node &>/dev/null; then
+        local current_version
         current_version=$(node -v | sed 's/v//')
+        local major_version
         major_version=$(echo "$current_version" | cut -d. -f1)
 
         if [ "$major_version" -ge "$NODE_MIN_VERSION" ]; then
@@ -296,21 +306,25 @@ install_claude_code() {
 
     log_info "Installing Claude Code using official bootstrap script..."
 
-    # Download to temp file first, then execute
-    if ! curl -fsSL "$CLAUDE_BOOTSTRAP_URL" -o /tmp/claude_bootstrap.sh; then
+    # Use mktemp to avoid /tmp race conditions
+    local bootstrap_tmp
+    bootstrap_tmp=$(mktemp /tmp/claude_bootstrap.XXXXXX.sh)
+    if ! curl -fsSL --connect-timeout 30 --max-time 120 \
+        "$CLAUDE_BOOTSTRAP_URL" -o "$bootstrap_tmp"; then
         log_error "Failed to download bootstrap script. Check your network."
+        rm -f "$bootstrap_tmp"
         exit 1
     fi
 
-    bash /tmp/claude_bootstrap.sh || {
+    bash "$bootstrap_tmp" || {
         log_error "Bootstrap installation failed. Falling back to npm..."
-        rm -f /tmp/claude_bootstrap.sh
+        rm -f "$bootstrap_tmp"
         if ! npm install -g "$CLAUDE_PACKAGE"; then
             log_error "NPM installation failed."
             exit 1
         fi
     }
-    rm -f /tmp/claude_bootstrap.sh
+    rm -f "$bootstrap_tmp"
     log_success "Claude Code installed successfully"
 }
 
@@ -399,11 +413,13 @@ configure_claude() {
 
     ensure_dir_exists "$CONFIG_DIR"
 
-    # Export API key as env var so Node.js reads it safely (no shell injection)
+    # Export API key and other user-supplied values as env vars so Node.js
+    # reads them safely — avoids any shell injection risk from user input
     export MINIMAX_API_KEY="$api_key"
+    export MINIMAX_API_BASE_URL="$API_BASE_URL"
+    export MINIMAX_MODEL_NAME="$MINIMAX_MODEL"
 
     # Write settings.json with MiniMax Model Mapping (merge with existing settings)
-    # Pass API key via environment variable — avoids any shell injection risk
     node -e "
         const os = require('os');
         const fs = require('fs');
@@ -423,21 +439,22 @@ configure_claude() {
         if (!config.env) config.env = {};
 
         // Set MiniMax env vars (preserves other env vars from other tools)
+        const model = process.env.MINIMAX_MODEL_NAME;
         config.env.ANTHROPIC_AUTH_TOKEN = process.env.MINIMAX_API_KEY;
-        config.env.ANTHROPIC_BASE_URL = '$API_BASE_URL';
+        config.env.ANTHROPIC_BASE_URL = process.env.MINIMAX_API_BASE_URL;
         config.env.API_TIMEOUT_MS = '3000000';
-        config.env.CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = 1;
-        config.env.ANTHROPIC_MODEL = '$MINIMAX_MODEL';
-        config.env.ANTHROPIC_SMALL_FAST_MODEL = '$MINIMAX_MODEL';
-        config.env.ANTHROPIC_DEFAULT_SONNET_MODEL = '$MINIMAX_MODEL';
-        config.env.ANTHROPIC_DEFAULT_OPUS_MODEL = '$MINIMAX_MODEL';
-        config.env.ANTHROPIC_DEFAULT_HAIKU_MODEL = '$MINIMAX_MODEL';
+        config.env.CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = '1';
+        config.env.ANTHROPIC_MODEL = model;
+        config.env.ANTHROPIC_SMALL_FAST_MODEL = model;
+        config.env.ANTHROPIC_DEFAULT_SONNET_MODEL = model;
+        config.env.ANTHROPIC_DEFAULT_OPUS_MODEL = model;
+        config.env.ANTHROPIC_DEFAULT_HAIKU_MODEL = model;
 
         fs.writeFileSync(filePath, JSON.stringify(config, null, 2), 'utf-8');
-    " || { log_error "Failed to write settings.json"; exit 1; }
+    " || { log_error "Failed to write settings.json"; unset MINIMAX_API_KEY MINIMAX_API_BASE_URL MINIMAX_MODEL_NAME; exit 1; }
 
-    # Clear API key from environment
-    unset MINIMAX_API_KEY
+    # Clear sensitive values from environment
+    unset MINIMAX_API_KEY MINIMAX_API_BASE_URL MINIMAX_MODEL_NAME
 
     log_success "Settings saved to $CONFIG_DIR/settings.json"
 }
@@ -463,9 +480,8 @@ configure_mcp_servers() {
     local api_key
     api_key=$(node -e "
         const fs = require('fs');
-        const path = require('path');
         try {
-            const settings = JSON.parse(fs.readFileSync('$settings_file', 'utf-8'));
+            const settings = JSON.parse(fs.readFileSync(process.env.MINIMAX_SETTINGS_FILE, 'utf-8'));
             console.log(settings.env?.ANTHROPIC_AUTH_TOKEN || '');
         } catch (e) {
             console.log('');
@@ -477,15 +493,15 @@ configure_mcp_servers() {
         return 0
     fi
 
-    # Export API key as env var for Node.js (no shell injection)
+    # Export values as env vars for Node.js (no shell injection)
     export MINIMAX_API_KEY="$api_key"
     export MINIMAX_API_HOST="$api_host"
+    export MINIMAX_SETTINGS_FILE="$settings_file"
 
     # Merge MiniMax MCP config into settings.json
     node -e "
         const fs = require('fs');
-        const path = require('path');
-        const settingsPath = '$settings_file';
+        const settingsPath = process.env.MINIMAX_SETTINGS_FILE;
 
         let settings = {};
         try {
@@ -507,9 +523,13 @@ configure_mcp_servers() {
         };
 
         fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2), 'utf-8');
-    " || { log_error "Failed to configure MCP server"; unset MINIMAX_API_KEY MINIMAX_API_HOST; return 1; }
+    " || {
+        log_error "Failed to configure MCP server"
+        unset MINIMAX_API_KEY MINIMAX_API_HOST MINIMAX_SETTINGS_FILE
+        return 1
+    }
 
-    unset MINIMAX_API_KEY MINIMAX_API_HOST
+    unset MINIMAX_API_KEY MINIMAX_API_HOST MINIMAX_SETTINGS_FILE
     log_success "MiniMax MCP server configured."
 }
 
@@ -545,12 +565,16 @@ install_mcp_servers() {
     # Check for uv
     if ! command -v uv &>/dev/null; then
         log_info "Installing uv..."
-        if ! curl -LsSf https://astral.sh/uv/install.sh -o /tmp/uv_install.sh; then
+        local uv_tmp
+        uv_tmp=$(mktemp /tmp/uv_install.XXXXXX.sh)
+        if ! curl -LsSf --connect-timeout 30 --max-time 120 \
+            https://astral.sh/uv/install.sh -o "$uv_tmp"; then
             log_error "Failed to download uv installer."
+            rm -f "$uv_tmp"
             return 1
         fi
-        sh /tmp/uv_install.sh || { log_error "uv installation failed."; rm -f /tmp/uv_install.sh; return 1; }
-        rm -f /tmp/uv_install.sh
+        sh "$uv_tmp" || { log_error "uv installation failed."; rm -f "$uv_tmp"; return 1; }
+        rm -f "$uv_tmp"
 
         # Source the profile to get uv in PATH for this session
         # shellcheck source=/dev/null
@@ -560,8 +584,8 @@ install_mcp_servers() {
 
     # uvx runs the package on-the-fly; no separate install step needed.
     # The settings.json mcpServers entry tells Claude Code to launch it.
-    log_success "MiniMax MCP server ready (configured in settings.json)."
     configure_mcp_servers
+    log_success "MiniMax MCP server ready (configured in settings.json)."
 
     echo ""
     echo "Note: Restart Claude Code for MCP tools to appear."
@@ -578,6 +602,9 @@ main() {
     echo "   (Token Plan Edition)"
     echo "=============================================="
     echo ""
+
+    # Initialize early to avoid set -u failures if logic flow changes
+    SKIP_INSTALL=0
 
     # Check if Claude Code is already installed
     if check_claude_code; then
@@ -599,8 +626,6 @@ main() {
 
         log_info "Configuring your existing Claude Code for MiniMax..."
         SKIP_INSTALL=1
-    else
-        SKIP_INSTALL=0
     fi
 
     check_nodejs
