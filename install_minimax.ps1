@@ -107,28 +107,30 @@ function Select-Region {
 function Select-Model {
     while ($true) {
         Write-Host 'Select your MiniMax model:'
-        Write-Host '  1) MiniMax-M2.7           (~50 TPS normal, 100 TPS off-peak)'
-        Write-Host '  2) MiniMax-M2.7-highspeed (~100 TPS sustained, HS plan only)'
-        Write-Host '  3) MiniMax-M2.5'
-        Write-Host '  4) MiniMax-M2.5-highspeed (HS plan only)'
-        Write-Host '  5) MiniMax-M2.1'
-        Write-Host '  6) MiniMax-M2'
-        Write-Host '  7) Custom (enter manually)'
+        Write-Host '  1) MiniMax-M3              (Frontier, 1M context, multimodal, agentic)'
+        Write-Host '  2) MiniMax-M2.7           (~50 TPS normal, 100 TPS off-peak)'
+        Write-Host '  3) MiniMax-M2.7-highspeed (~100 TPS sustained, HS plan only)'
+        Write-Host '  4) MiniMax-M2.5'
+        Write-Host '  5) MiniMax-M2.5-highspeed (HS plan only)'
+        Write-Host '  6) MiniMax-M2.1'
+        Write-Host '  7) MiniMax-M2'
+        Write-Host '  8) Custom (enter manually)'
         Write-Host ''
         Write-Host "Note: '-highspeed' models require an HS-tier subscription."
         Write-Host '      Available only with: Plus-HS, Max-HS, or Ultra-HS.'
-        Write-Host '      Standard plans (Starter, Plus, Max) use the base M2.7.'
+        Write-Host '      Standard plans (Starter, Plus, Max) use M3 or base M2.7.'
         Write-Host ''
-        $choice = Read-Host 'Enter choice (1-7)'
+        $choice = Read-Host 'Enter choice (1-8)'
         Write-Host ''
         switch ($choice) {
-            '1' { $script:MINIMAX_MODEL = 'MiniMax-M2.7';           Log-Info "Selected model: $script:MINIMAX_MODEL"; return }
-            '2' { $script:MINIMAX_MODEL = 'MiniMax-M2.7-highspeed'; Log-Info "Selected model: $script:MINIMAX_MODEL"; return }
-            '3' { $script:MINIMAX_MODEL = 'MiniMax-M2.5';           Log-Info "Selected model: $script:MINIMAX_MODEL"; return }
-            '4' { $script:MINIMAX_MODEL = 'MiniMax-M2.5-highspeed'; Log-Info "Selected model: $script:MINIMAX_MODEL"; return }
-            '5' { $script:MINIMAX_MODEL = 'MiniMax-M2.1';           Log-Info "Selected model: $script:MINIMAX_MODEL"; return }
-            '6' { $script:MINIMAX_MODEL = 'MiniMax-M2';             Log-Info "Selected model: $script:MINIMAX_MODEL"; return }
-            '7' {
+            '1' { $script:MINIMAX_MODEL = 'MiniMax-M3';             Log-Info "Selected model: $script:MINIMAX_MODEL"; return }
+            '2' { $script:MINIMAX_MODEL = 'MiniMax-M2.7';           Log-Info "Selected model: $script:MINIMAX_MODEL"; return }
+            '3' { $script:MINIMAX_MODEL = 'MiniMax-M2.7-highspeed'; Log-Info "Selected model: $script:MINIMAX_MODEL"; return }
+            '4' { $script:MINIMAX_MODEL = 'MiniMax-M2.5';           Log-Info "Selected model: $script:MINIMAX_MODEL"; return }
+            '5' { $script:MINIMAX_MODEL = 'MiniMax-M2.5-highspeed'; Log-Info "Selected model: $script:MINIMAX_MODEL"; return }
+            '6' { $script:MINIMAX_MODEL = 'MiniMax-M2.1';           Log-Info "Selected model: $script:MINIMAX_MODEL"; return }
+            '7' { $script:MINIMAX_MODEL = 'MiniMax-M2';             Log-Info "Selected model: $script:MINIMAX_MODEL"; return }
+            '8' {
                 $custom = Read-Host 'Enter custom model name'
                 Write-Host ''
                 if ([string]::IsNullOrWhiteSpace($custom)) {
@@ -139,7 +141,7 @@ function Select-Model {
                     return
                 }
             }
-            default { Log-Error 'Invalid choice. Please enter 1-7.' }
+            default { Log-Error 'Invalid choice. Please enter 1-8.' }
         }
     }
 }

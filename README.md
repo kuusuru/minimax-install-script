@@ -18,7 +18,7 @@ Get your API key:
 
 - Installs Claude Code via the official bootstrap script (Linux/macOS) or npm (Windows)
 - Region selection: International (`api.minimax.io`) or China (`api.minimaxi.com`)
-- Model selection: M2.7, M2.7-hs, M2.5, M2.5-hs, M2.1, M2, or Custom
+- Model selection: M3, M2.7, M2.7-hs, M2.5, M2.5-hs, M2.1, M2, or Custom
 - Billing type: Token Plan or Pay-As-You-Go
 - Optional MiniMax MCP server (`web_search`, `understand_image`)
 - Merges config into existing `settings.json` — preserves other tool settings
@@ -81,6 +81,7 @@ claude
 
 | Model | Description |
 |---|---|
+| MiniMax-M3 | Frontier model, 1M context, multimodal, agentic, tool use |
 | MiniMax-M2.7 | ~50 TPS normal, 100 TPS off-peak |
 | MiniMax-M2.7-highspeed | ~100 TPS sustained (HS plan only) |
 | MiniMax-M2.5 | Balanced performance |

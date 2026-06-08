@@ -94,53 +94,59 @@ select_region() {
 select_model() {
     while true; do
         echo "Select your MiniMax model:"
-        echo "  1) MiniMax-M2.7          (~50 TPS normal, 100 TPS off-peak)"
-        echo "  2) MiniMax-M2.7-highspeed (~100 TPS sustained, HS plan only)"
-        echo "  3) MiniMax-M2.5"
-        echo "  4) MiniMax-M2.5-highspeed (HS plan only)"
-        echo "  5) MiniMax-M2.1"
-        echo "  6) MiniMax-M2"
-        echo "  7) Custom (enter manually)"
+        echo "  1) MiniMax-M3             (Frontier, 1M context, multimodal, agentic)"
+        echo "  2) MiniMax-M2.7           (~50 TPS normal, 100 TPS off-peak)"
+        echo "  3) MiniMax-M2.7-highspeed (~100 TPS sustained, HS plan only)"
+        echo "  4) MiniMax-M2.5"
+        echo "  5) MiniMax-M2.5-highspeed (HS plan only)"
+        echo "  6) MiniMax-M2.1"
+        echo "  7) MiniMax-M2"
+        echo "  8) Custom (enter manually)"
         echo ""
         echo "Note: '-highspeed' models require an HS-tier subscription."
         echo "      Available only with: Plus–HS, Max–HS, or Ultra–HS."
-        echo "      Standard plans (Starter, Plus, Max) use the base M2.7."
+        echo "      Standard plans (Starter, Plus, Max) use M3 or base M2.7."
         echo ""
-        read -p "Enter choice (1-7): " choice
+        read -p "Enter choice (1-8): " choice
         echo ""
 
         case "$choice" in
             1)
-                MINIMAX_MODEL="MiniMax-M2.7"
+                MINIMAX_MODEL="MiniMax-M3"
                 log_info "Selected model: $MINIMAX_MODEL"
                 return 0
                 ;;
             2)
-                MINIMAX_MODEL="MiniMax-M2.7-highspeed"
+                MINIMAX_MODEL="MiniMax-M2.7"
                 log_info "Selected model: $MINIMAX_MODEL"
                 return 0
                 ;;
             3)
-                MINIMAX_MODEL="MiniMax-M2.5"
+                MINIMAX_MODEL="MiniMax-M2.7-highspeed"
                 log_info "Selected model: $MINIMAX_MODEL"
                 return 0
                 ;;
             4)
-                MINIMAX_MODEL="MiniMax-M2.5-highspeed"
+                MINIMAX_MODEL="MiniMax-M2.5"
                 log_info "Selected model: $MINIMAX_MODEL"
                 return 0
                 ;;
             5)
-                MINIMAX_MODEL="MiniMax-M2.1"
+                MINIMAX_MODEL="MiniMax-M2.5-highspeed"
                 log_info "Selected model: $MINIMAX_MODEL"
                 return 0
                 ;;
             6)
-                MINIMAX_MODEL="MiniMax-M2"
+                MINIMAX_MODEL="MiniMax-M2.1"
                 log_info "Selected model: $MINIMAX_MODEL"
                 return 0
                 ;;
             7)
+                MINIMAX_MODEL="MiniMax-M2"
+                log_info "Selected model: $MINIMAX_MODEL"
+                return 0
+                ;;
+            8)
                 read -p "Enter custom model name: " MINIMAX_MODEL
                 echo ""
                 if [ -z "$MINIMAX_MODEL" ]; then
@@ -151,7 +157,7 @@ select_model() {
                 return 0
                 ;;
             *)
-                log_error "Invalid choice. Please enter 1-7."
+                log_error "Invalid choice. Please enter 1-8."
                 ;;
         esac
     done
