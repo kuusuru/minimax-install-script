@@ -21,9 +21,9 @@
 #    You can reinstall fresh using install_minimax.sh
 #
 # 2) MINIMAX CONFIG ONLY - Removes only MiniMax settings:
-#    - ~/.claude/settings.json (MiniMax config)
+#    - MiniMax env vars from ~/.claude/settings.json
+#    - MiniMax mcpServers from ~/.claude/settings.json
 #    - ~/.claude.json
-#    - Project-specific .claude/ and .mcp.json
 #
 #    This keeps Claude Code installed but removes MiniMax configuration.
 #    You can reconfigure MiniMax by running install_minimax.sh again.
@@ -155,17 +155,6 @@ full_uninstall() {
         log_success "Removed $HOME/.claude.json"
     fi
 
-    # 4. Remove project-specific settings (from current directory)
-    if [ -d ".claude" ]; then
-        rm -rf ".claude"
-        log_success "Removed .claude/ (project settings)"
-    fi
-
-    if [ -f ".mcp.json" ]; then
-        rm -f ".mcp.json"
-        log_success "Removed .mcp.json"
-    fi
-
     # 5. Clear terminal cache
     hash -r
 
@@ -205,7 +194,6 @@ config_only_uninstall() {
     echo "  - MiniMax env vars from ~/.claude/settings.json"
     echo "  - MiniMax mcpServers from ~/.claude/settings.json"
     echo "  - ~/.claude.json"
-    echo "  - Project-specific .claude/ and .mcp.json"
     echo ""
     log_info "Claude Code and other MCP servers will remain configured."
     echo ""
@@ -262,17 +250,6 @@ config_only_uninstall() {
     if [ -f "$HOME/.claude.json" ]; then
         rm -f "$HOME/.claude.json"
         log_success "Removed $HOME/.claude.json"
-    fi
-
-    # 2. Remove project-specific settings
-    if [ -d ".claude" ]; then
-        rm -rf ".claude"
-        log_success "Removed .claude/ (project settings)"
-    fi
-
-    if [ -f ".mcp.json" ]; then
-        rm -f ".mcp.json"
-        log_success "Removed .mcp.json"
     fi
 
     # 3. Clear terminal cache

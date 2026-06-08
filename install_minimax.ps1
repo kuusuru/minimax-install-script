@@ -19,7 +19,17 @@
     Run with:
       Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
       .\install_minimax.ps1
+
+    Batch mode:
+      .\install_minimax.ps1 -Region 1 -Model "MiniMax-M3" -Billing token -ApiKey "your-key"
 #>
+
+param(
+    [string]$Region,
+    [string]$Model,
+    [string]$ApiKey,
+    [string]$Billing
+)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -34,6 +44,12 @@ $CONFIG_DIR        = Join-Path $env:USERPROFILE '.claude'
 $TOKEN_PLAN_URL    = 'https://platform.minimax.io/user-center/payment/token-plan'
 $PLATFORM_URL      = 'https://platform.minimax.io/user-center/basic-information/interface-key'
 $NVM_WINDOWS_URL   = 'https://github.com/coreybutler/nvm-windows/releases/latest/download/nvm-setup.exe'
+
+# Claude Code version pinning — set to a specific version to pin, or empty for latest.
+$CLAUDE_CODE_VERSION = ''
+
+# API timeout in milliseconds (50 minutes)
+$API_TIMEOUT_MS = '3000000'
 
 # ========================
 #     Logging Helpers
@@ -58,6 +74,8 @@ function Download-Temp {
     param([string]$Url, [string]$Ext = 'tmp')
     $tmp = [System.IO.Path]::GetTempFileName()
     $tmpRenamed = [System.IO.Path]::ChangeExtension($tmp, $Ext)
+    # Clean up the original temp file created by GetTempFileName
+    Remove-Item $tmp -ErrorAction SilentlyContinue
     try {
         Invoke-WebRequest -Uri $Url -OutFile $tmpRenamed -UseBasicParsing -TimeoutSec 120
     } catch {
@@ -78,6 +96,15 @@ function Refresh-Path {
 #     Region Selection
 # ========================
 function Select-Region {
+    # Batch mode: use command-line argument
+    if ($Region) {
+        switch ($Region) {
+            '1' { $script:API_BASE_URL = 'https://api.minimax.io/anthropic'; Log-Info "Selected International endpoint: $script:API_BASE_URL"; return }
+            '2' { $script:API_BASE_URL = 'https://api.minimaxi.com/anthropic'; Log-Info "Selected China endpoint: $script:API_BASE_URL"; return }
+            default { Log-Error "Invalid -Region value: $Region (must be 1 or 2)"; exit 1 }
+        }
+    }
+
     while ($true) {
         Write-Host "Select your region:"
         Write-Host "  1) International (outside China) - uses api.minimax.io"
@@ -105,6 +132,13 @@ function Select-Region {
 #     Model Selection
 # ========================
 function Select-Model {
+    # Batch mode: use command-line argument
+    if ($Model) {
+        $script:MINIMAX_MODEL = $Model
+        Log-Info "Selected model: $script:MINIMAX_MODEL"
+        return
+    }
+
     while ($true) {
         Write-Host 'Select your MiniMax model:'
         Write-Host '  1) MiniMax-M3              (Frontier, 1M context, multimodal, agentic)'
@@ -150,6 +184,23 @@ function Select-Model {
 #     Billing Type
 # ========================
 function Select-KeyType {
+    # Batch mode: use command-line argument
+    if ($Billing) {
+        switch ($Billing) {
+            'token' {
+                Write-Host "  Get your Token Plan API Key at: $TOKEN_PLAN_URL"
+                $script:BILLING_TYPE = 'token'
+                return
+            }
+            'payg' {
+                Write-Host "  Get your Platform API Key at: $PLATFORM_URL"
+                $script:BILLING_TYPE = 'payg'
+                return
+            }
+            default { Log-Error "Invalid -Billing value: $Billing (must be 'token' or 'payg')"; exit 1 }
+        }
+    }
+
     while ($true) {
         Write-Host 'Select your MiniMax billing type:'
         Write-Host '  1) Token Plan (fixed monthly fee, includes usage)'
@@ -190,8 +241,8 @@ function Install-NodeJS {
 
     try {
         $nvmInstaller = Download-Temp -Url $NVM_WINDOWS_URL -Ext 'exe'
-        Log-Info 'Running nvm-windows installer (follow the prompts)...'
-        Start-Process -FilePath $nvmInstaller -Wait
+        Log-Info 'Running nvm-windows installer (silent mode)...'
+        Start-Process -FilePath $nvmInstaller -ArgumentList '/SILENT' -Wait
         Remove-Item $nvmInstaller -ErrorAction SilentlyContinue
     } catch {
         Log-Error "Failed to download/install nvm-windows: $_"
@@ -249,7 +300,11 @@ function Check-ClaudeCode {
 function Install-ClaudeCode {
     Log-Info 'Installing Claude Code via npm...'
     try {
-        & npm install -g $CLAUDE_PACKAGE
+        if ($script:CLAUDE_CODE_VERSION) {
+            & npm install -g "$CLAUDE_PACKAGE@$script:CLAUDE_CODE_VERSION"
+        } else {
+            & npm install -g $CLAUDE_PACKAGE
+        }
         Refresh-Path
         Log-OK 'Claude Code installed successfully.'
     } catch {
@@ -300,14 +355,29 @@ function Configure-Claude {
     Select-KeyType
     Write-Host ''
 
-    # Read API key without echoing it
-    $secureKey = Read-Host '  Paste your MiniMax API Key' -AsSecureString
-    $apiKey = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto(
-                  [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureKey))
+    # Read API key — batch mode or interactive
+    if ($ApiKey) {
+        $apiKey = $ApiKey
+    } else {
+        $secureKey = Read-Host '  Paste your MiniMax API Key' -AsSecureString
+        $bstr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secureKey)
+        try {
+            $apiKey = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($bstr)
+        } finally {
+            # Zero out the BSTR to prevent leaking the key in memory
+            [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
+        }
+    }
     Write-Host ''
 
     if ([string]::IsNullOrWhiteSpace($apiKey)) {
         Log-Error 'API key is required.'
+        exit 1
+    }
+
+    # Ensure node is available
+    if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+        Log-Error 'Node.js is not available. Cannot write settings.json.'
         exit 1
     }
 
@@ -317,6 +387,7 @@ function Configure-Claude {
     $env:MINIMAX_API_KEY      = $apiKey
     $env:MINIMAX_API_BASE_URL = $script:API_BASE_URL
     $env:MINIMAX_MODEL_NAME   = $script:MINIMAX_MODEL
+    $env:MINIMAX_API_TIMEOUT  = $API_TIMEOUT_MS
     $settingsPath = Join-Path $CONFIG_DIR 'settings.json'
     $env:MINIMAX_SETTINGS_FILE = $settingsPath
 
@@ -339,7 +410,7 @@ if (!config.env) config.env = {};
 const model = process.env.MINIMAX_MODEL_NAME;
 config.env.ANTHROPIC_AUTH_TOKEN                    = process.env.MINIMAX_API_KEY;
 config.env.ANTHROPIC_BASE_URL                      = process.env.MINIMAX_API_BASE_URL;
-config.env.API_TIMEOUT_MS                          = '3000000';
+config.env.API_TIMEOUT_MS                          = process.env.MINIMAX_API_TIMEOUT;
 config.env.CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = '1';
 config.env.ANTHROPIC_MODEL                         = model;
 config.env.ANTHROPIC_SMALL_FAST_MODEL              = model;
@@ -353,6 +424,13 @@ fs.writeFileSync(filePath, JSON.stringify(config, null, 2), 'utf-8');
     try {
         & node -e $nodeScript
         Log-OK "Settings saved to $settingsPath"
+
+        # Restrict settings.json permissions to current user only
+        try {
+            & icacls $settingsPath /inheritance:r /grant:r "${env:USERNAME}:(R,W)" 2>$null | Out-Null
+        } catch {
+            Log-Warn 'Could not restrict file permissions on settings.json. Consider restricting it manually.'
+        }
     } catch {
         Log-Error "Failed to write settings.json: $_"
         exit 1
@@ -361,8 +439,11 @@ fs.writeFileSync(filePath, JSON.stringify(config, null, 2), 'utf-8');
         Remove-Item env:MINIMAX_API_KEY       -ErrorAction SilentlyContinue
         Remove-Item env:MINIMAX_API_BASE_URL  -ErrorAction SilentlyContinue
         Remove-Item env:MINIMAX_MODEL_NAME    -ErrorAction SilentlyContinue
+        Remove-Item env:MINIMAX_API_TIMEOUT   -ErrorAction SilentlyContinue
         Remove-Item env:MINIMAX_SETTINGS_FILE -ErrorAction SilentlyContinue
     }
+
+    Log-Info "Note: $settingsPath contains your API key. Keep it secure."
 }
 
 # ========================
@@ -466,9 +547,14 @@ function Install-McpServers {
     if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
         Log-Info 'Installing uv (Python package manager)...'
         try {
-            # Official uv Windows installer
-            $uvInstallScript = (Invoke-WebRequest -Uri 'https://astral.sh/uv/install.ps1' -UseBasicParsing).Content
-            Invoke-Expression $uvInstallScript
+            # Download uv installer to temp file and execute safely
+            $uvTmpFile = Join-Path ([System.IO.Path]::GetTempPath()) "uv_install_$([System.IO.Path]::GetRandomFileName()).ps1"
+            try {
+                Invoke-WebRequest -Uri 'https://astral.sh/uv/install.ps1' -OutFile $uvTmpFile -UseBasicParsing -TimeoutSec 120
+                & $uvTmpFile
+            } finally {
+                Remove-Item $uvTmpFile -ErrorAction SilentlyContinue
+            }
             Refresh-Path
             # uv installs to %USERPROFILE%\.local\bin or %USERPROFILE%\.cargo\bin
             $env:Path = "$env:USERPROFILE\.local\bin;$env:USERPROFILE\.cargo\bin;$env:Path"

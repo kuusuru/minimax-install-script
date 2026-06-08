@@ -49,7 +49,7 @@ Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 
 The script will prompt for:
 1. Region (International or China)
-2. Model (M2.7, M2.7-hs, M2.5, M2.5-hs, M2.1, M2, or Custom)
+2. Model (M3, M2.7, M2.7-hs, M2.5, M2.5-hs, M2.1, M2, or Custom)
 3. Billing type (Token Plan or Pay-As-You-Go)
 4. API key
 5. Optional MCP server installation (`web_search`, `understand_image`)

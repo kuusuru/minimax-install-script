@@ -23,7 +23,6 @@
        - MiniMax env vars from %USERPROFILE%\.claude\settings.json
        - MiniMax mcpServers from settings.json
        - %USERPROFILE%\.claude.json
-       - Project-specific .claude\ and .mcp.json
 
        Keeps Claude Code installed. Reconfigure by running install_minimax.ps1 again.
 
@@ -156,16 +155,6 @@ function Invoke-FullUninstall {
         Log-OK "Removed $claudeJson"
     }
 
-    # 4. Remove project-specific settings (current directory)
-    if (Test-Path '.claude') {
-        Remove-Item -Recurse -Force '.claude'
-        Log-OK 'Removed .claude\ (project settings)'
-    }
-    if (Test-Path '.mcp.json') {
-        Remove-Item -Force '.mcp.json'
-        Log-OK 'Removed .mcp.json'
-    }
-
     # 5. Verify removal
     Refresh-Path
     Log-Info 'Verifying removal...'
@@ -195,7 +184,6 @@ function Invoke-ConfigOnlyUninstall {
     Write-Host "  - MiniMax env vars from $CONFIG_DIR\settings.json"
     Write-Host "  - MiniMax mcpServers from $CONFIG_DIR\settings.json"
     Write-Host "  - $env:USERPROFILE\.claude.json"
-    Write-Host '  - Project-specific .claude\ and .mcp.json'
     Write-Host ''
     Log-Info 'Claude Code and other MCP servers will remain configured.'
     Write-Host ''
@@ -254,16 +242,6 @@ try {
     if (Test-Path $claudeJson) {
         Remove-Item -Force $claudeJson
         Log-OK "Removed $claudeJson"
-    }
-
-    # 3. Remove project-specific settings
-    if (Test-Path '.claude') {
-        Remove-Item -Recurse -Force '.claude'
-        Log-OK 'Removed .claude\ (project settings)'
-    }
-    if (Test-Path '.mcp.json') {
-        Remove-Item -Force '.mcp.json'
-        Log-OK 'Removed .mcp.json'
     }
 
     Write-Host ''
